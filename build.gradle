@@ -56,6 +56,20 @@ dependencyManagement {
   }
 }
 
+tasks.named("bootBuildImage") {
+	imageName = "${project.name}"
+	environment["BP_JVM_VERSION"] = "23.*"
+	publish = true
+	docker {
+		publishRegistry {			
+			username = project.findProperty("registryUsername")
+			password = project.findProperty("registryToken")
+			url = project.findProperty("registryUrl")
+		}
+	
+	}
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
