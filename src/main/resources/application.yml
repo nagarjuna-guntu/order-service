@@ -21,8 +21,7 @@ spring:
   flyway:
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
-    url: jdbc:postgresql://localhost:5432/polardb_order
-    
+    url: jdbc:postgresql://localhost:5432/polardb_order   
   config:
     import: "optional:configserver:"
   cloud:
@@ -35,13 +34,56 @@ spring:
         max-attemts: 6
         initial-interval: 1000 # 1s
         max-interval: 2000     #2s
-        multiplier: 1.1
+        multiplier: 1.1      
+    function:
+      difinition: dispatchOrder
+    stream:
+      bindings:
+        dispatchOrder-in-0:
+          destination: order-dispached
+          group: ${spring.application.name}  
+        acceptOrder-out-0:      
+          destination: order-accepted    
+      rabbit:
+        bindings:
+          acceptOrder-out-0:
+            producer:
+              transacted: true
+                 
+  rabbitmq: 
+    host: localhost 
+    port: 5672 
+    username: user 
+    password: password 
+    connection-timeout: 5s     
 
+  security:
+    oauh2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/PolarBookshop
 polar:
-  catalog-service-uri: "http://localhost:9001"    
+  catalog-service-uri: http://localhost:9001   
   
 management:
   endpoints:
     web:
       exposure:
-        include: refresh
+        include: refresh, health
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}  
+  tracing:
+    sampling:
+      probability: 1.0
+      
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}] "
+  include-application-name: false  
