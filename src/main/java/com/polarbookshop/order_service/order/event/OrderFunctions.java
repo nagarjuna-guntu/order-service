@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.order;
+package com.polarbookshop.order_service.order.event;
 
 import java.util.function.Consumer;
 
@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.polarbookshop.order_service.domain.OrderService;
+import com.polarbookshop.order_service.order.domain.OrderService;
 
 import reactor.core.publisher.Flux;
 

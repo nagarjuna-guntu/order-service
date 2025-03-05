@@ -10,90 +10,121 @@ spring:
     name: order-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
-  r2dbc:
-    username: user
-    password: password
-    url: r2dbc:postgresql://localhost:5432/polardb_order
-    pool:
-      max-create-connection-time: 2s
-      initial-size: 5
-      max-size: 10
-  flyway:
-    user: ${spring.r2dbc.username}
-    password: ${spring.r2dbc.password}
-    url: jdbc:postgresql://localhost:5432/polardb_order   
-  config:
-    import: "" #"optional:configserver:"
-  cloud:
-    config:
-      enabled: false
-      uri: http://localhost:8888
-      request-connect-timeout: 5000 # 5s
-      request-read-timeout: 5000    # 5s
-      fail-fast: false  # In prod set to true
-      retry:
-        max-attemts: 6
-        initial-interval: 1000 # 1s
-        max-interval: 2000     #2s
-        multiplier: 1.1      
-    function:
-      difinition: dispatchOrder
-    stream:
-      bindings:
-        dispatchOrder-in-0:
-          destination: order-dispached
-          group: ${spring.application.name}  
-        acceptOrder-out-0:      
-          destination: order-accepted    
-      rabbit:
-        bindings:
-          acceptOrder-out-0:
-            producer:
-              transacted: true
-                 
-  rabbitmq: 
-    host: localhost 
-    port: 5672 
-    username: user 
-    password: password 
-    connection-timeout: 5s     
-
-  security:
-    oauh2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/PolarBookshop
+spring.r2dbc:
+  username: user
+  password: password
+  url: r2dbc:postgresql://localhost:5432/polardb_order
+  pool:
+    max-create-connection-time: 2s #The maximum time to wait to get a connection from the pool.
+    initial-size: 5
+    max-size: 10
+spring.flyway:
+  user: ${spring.r2dbc.username}
+  password: ${spring.r2dbc.password}
+  url: jdbc:postgresql://localhost:5432/polardb_order   
+spring.config.import: "" #"optional:configserver:"
+spring.cloud.config:
+  enabled: false
+  uri: http://localhost:8888
+  request-connect-timeout: 5000 # 5s
+  request-read-timeout: 5000    # 5s
+  fail-fast: false  # In prod set to true
+  retry:
+    max-attemts: 6
+    initial-interval: 1000 # 1s
+    max-interval: 2000     #2s
+    multiplier: 1.1      
+spring.cloud.function:
+  difinition: dispatchOrder
+spring.cloud.stream:
+  bindings:
+    dispatchOrder-in-0:
+      destination: order-dispached
+      group: ${spring.application.name}  
+    acceptOrder-out-0:      
+      destination: order-accepted    
+  rabbit:
+    bindings:
+      dispatchOrder-in-0:
+        consumer:
+          maxAttempts: 2 # retries, if > 1 means retry, maxAttempts=1 means no retry.
+          ttl: 2000 # timt to live in the queue, after expiration, it moves to dead letter queue.
+          auto-bind-dlq: true # eneble dead letter queue.
+      acceptOrder-out-0:
+        producer:
+          transacted: true               
+spring.rabbitmq: 
+  host: localhost 
+  port: 5672 
+  username: user 
+  password: password 
+  connection-timeout: 5s     
+spring.security.oauh2:
+  resourceserver:
+    jwt:
+      issuer-uri: http://localhost:8080/realms/PolarBookshop
+      #jwk-set-uri: http://localhost:8080/realms/PolarBookshop/protocol/openid-connect/certs
 polar:
   catalog-service-uri: http://localhost:9001   
 
 info:
   system: Polar Bookshop
     
-management:
-  endpoints:
-    web:
-      exposure:
-        include: refresh, health, bindings, configprops, env, flyway, functions, info, loggers, mappings, metrics
-  endpoint:
-    health:
-      show-details: always
-      show-components: always
-      probes:
-        enabled: true
-  metrics:
-    tags:
-      application: ${spring.application.name}  
-  tracing:
-    sampling:
-      probability: 1.0
-  info:
-    env:
+management.endpoints:
+  web:
+    exposure:
+      include: refresh, health, bindings, configprops, env, flyway, functions, info, loggers, mappings, metrics
+management.endpoint:
+  health:
+    show-details: always
+    show-components: always
+    probes:
       enabled: true
-    java:
-      enabled: true
-    os:
-      enabled: true  
-        
+management.health:
+  binders:
+    enabled: true
+management.metrics:
+  tags:
+    application: ${spring.application.name}  
+management.tracing:
+  sampling:
+    probability: 1.0
+management.info:
+  env:
+    enabled: true
+  java:
+    enabled: true
+  os:
+    enabled: true 
+       
+resilience4j.circuitbreaker:
+  instances:
+    catalogService:
+      registerHealthIndicator: true
+      slidingWindowSize: 10
+      failureRateTheshold: 50
+      permittedNumberOfCallsInHalfOpenState: 4
+      waitDurationInOpenState: 15000
+resilience4j.timelimiter:
+  instances:
+    catalogService:
+      registerHealthIndicator: true
+      timeoutDuration: 5s
+resilience4j.retry:
+  instances:
+    getCatalogService:
+      registerHealthIndicator: true
+      maxAttempts: 3
+      waitDuration: 10s
+      retryExceptions: java.io.IOException, java.util.concurrent.TimeoutException
+resilience4j.ratelimiter: #It is client-side rate limiter controls out-going traffic.
+  instances:
+    catalogService:
+      registerHealthIndicator: true
+      timeoutDuration: 1000ms   
+      limitRefreshPeriod: 5000  
+      limitForPeriod: 5  
+                  
 logging:
   pattern:
     correlation: "%clr([${spring.application.name:},%X{traceId:-},%X{spanId:-}]){yellow} "

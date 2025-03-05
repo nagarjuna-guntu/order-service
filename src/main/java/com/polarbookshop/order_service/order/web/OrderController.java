@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.web;
+package com.polarbookshop.order_service.order.web;
 
 import java.util.Objects;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.polarbookshop.order_service.domain.Order;
-import com.polarbookshop.order_service.domain.OrderService;
+import com.polarbookshop.order_service.order.domain.Order;
+import com.polarbookshop.order_service.order.domain.OrderService;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

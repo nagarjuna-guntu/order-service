@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.domain;
+package com.polarbookshop.order_service.order.domain;
 
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.polarbookshop.order_service.book.Book;
 import com.polarbookshop.order_service.book.BookClient;
-import com.polarbookshop.order_service.order.OrderAcceptedMessage;
-import com.polarbookshop.order_service.order.OrderDispatchedMessage;
+import com.polarbookshop.order_service.order.event.OrderAcceptedMessage;
+import com.polarbookshop.order_service.order.event.OrderDispatchedMessage;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -66,9 +66,9 @@ public class OrderService {
 		 return rejectedOrder;
 	}
 
-	public Flux<Order> consumeOrderDispatchedEvent(Flux<OrderDispatchedMessage> flux) {
+	public Flux<Order> consumeOrderDispatchedEvent(Flux<OrderDispatchedMessage> fluxOrderDispatchedMessage) {
 		
-		return flux.flatMap(orderDispatchedMessage ->
+		return fluxOrderDispatchedMessage.flatMap(orderDispatchedMessage ->
 			 				orderRepository.findById(orderDispatchedMessage.orderId()))  
 			       .map(this::buildDispatchedOrder)    
 			       .flatMap(orderRepository::save);

@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.domain;
+package com.polarbookshop.order_service.order.domain;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
@@ -10,7 +10,7 @@ public interface OrderRepository extends ReactiveCrudRepository<Order, Long>{
 
 	Flux<Order> findByStatus(OrderStatus status);
 
-	Flux<Order> findAllByCreatedBy(String userId);
+	Flux<Order> findAllByCreatedBy(String createdBy);
 	
 
 }

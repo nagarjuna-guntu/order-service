@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContext;
 
 @Configuration
 @EnableR2dbcAuditing
-public class DataConfig {
+public class DataAuditConfig {
 	
 	@Bean
 	ReactiveAuditorAware<String>  auditorAware() {

@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.web;
+package com.polarbookshop.order_service.order.web;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.domain;
+package com.polarbookshop.order_service.order.domain;
 
 import java.time.Instant;
 

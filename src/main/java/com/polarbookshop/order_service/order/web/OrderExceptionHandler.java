@@ -1,4 +1,4 @@
-package com.polarbookshop.order_service.web;
+package com.polarbookshop.order_service.order.web;
 
 
 import org.springframework.http.HttpStatus;
@@ -6,7 +6,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.polarbookshop.order_service.domain.OrderNotFoundException;
+import com.polarbookshop.order_service.order.domain.OrderNotFoundException;
 
 import reactor.core.publisher.Mono;
 
